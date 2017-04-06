@@ -1,7 +1,7 @@
 {
-  "name": "node-js-getting-started",
-  "version": "0.2.5",
-  "description": "A sample Node.js app using Express 4",
+  "name": "YarBusBot",
+  "version": "0.0.1",
+  "description": "Two bus, two station",
   "engines": {
     "node": "7.2.0"
   },
@@ -14,21 +14,21 @@
     "node-telegram-bot-api": "0.27.0",
     "xmlhttprequest": "1.8.0",
     "html-entities": "1.2.0",
-	"utf8": "2.1.2"
+    "utf8": "2.1.2"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/heroku/node-js-getting-started.git"
+    "url": "git+https://github.com/IvanSupervan/YarBusBot.git"
   },
   "keywords": [
     "node",
     "heroku",
-    "express"
+    "telegram"
   ],
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/heroku/node-js-getting-started/issues"
-  },
-  "homepage": "https://github.com/heroku/node-js-getting-started#readme",
-  "author": ""
+  "homepage": "https://github.com/IvanSupervan/YarBusBot#readme",
+  "author": "Ivan Mogilevsky",
+  "devDependencies": {
+    "babel-cli": "^6.24.0"
+  }
 }

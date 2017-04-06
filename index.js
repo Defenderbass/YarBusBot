@@ -9,11 +9,11 @@ const
    busToWork = 'http://yartr.ru/rasp.php?vt=1&nmar=78&q=0&id=47&view=1',
    busToHome = 'http://yartr.ru/rasp.php?vt=1&nmar=78&q=1&id=424&view=1',
    bot = new TelegramBot(token, {
-   polling: true, webhook: {
-      'port': port,
-      'host': host
-   }
-});
+      polling: true, webhook: {
+         'port': port,
+         'host': host
+      }
+   });
 
 function prepareText(link) {
    let

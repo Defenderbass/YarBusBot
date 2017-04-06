@@ -1,0 +1,30 @@
+{
+    "maxerr": 999,
+    "camelcase": true,
+    "curly": true,
+    "eqeqeq": true,
+    "forin": true,
+    "immed": true,
+    "latedef": true,
+    "newcap": true,
+    "noarg": true,
+    "nonew": true,
+    "quotmark": "single",
+    "undef": true,
+    "unused": true,
+    "strict": true,
+    "maxparams": 4,
+    "maxdepth": 4,
+    "maxcomplexity": 10,
+    "eqnull": true,
+    "maxlen": 120,
+    "browser": true,
+    "devel": true,
+    "jquery": true,
+    "node": true,
+    "nonstandard": false,
+    "globals": {
+        "require": true,
+        "process": true
+    }
+}

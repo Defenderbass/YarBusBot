@@ -1,6 +1,6 @@
 const
    TelegramBot = require('node-telegram-bot-api'),
-   XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest,
+   XMLHttpRequests = require('xmlhttprequest').XMLHttpRequest,
    Entities = require('html-entities').XmlEntities,
    entities = new Entities(),
    token = '370885878:AAHNT9nRTHMd6MJ8dQvRbzw9GFpzomt719s',
@@ -10,14 +10,14 @@ const
    busToHome = 'http://yartr.ru/rasp.php?vt=1&nmar=78&q=1&id=424&view=1',
    bot = new TelegramBot(token, {
    polling: true, webhook: {
-      "port": port,
-      "host": host
+      'port': port,
+      'host': host
    }
 });
 
 function prepareText(link) {
    let
-      xhr = new XMLHttpRequest(),
+      xhr = new XMLHttpRequests(),
       original, position, pos;
 
    xhr.open('GET', link, false);
@@ -34,8 +34,7 @@ function prepareText(link) {
 }
 
 bot.onText(/\/start/, (msg) => {
-   const chatId = msg.chat.id;
-   bot.sendMessage(chatId, 'Hello! Commands: /gohome - bus on station "Hospital", /gowork bus on station "Prospect Tolbuhina"');
+   bot.sendMessage(msg.chat.id, 'Hello! Commands: /gohome - bus on station "Hospital", /gowork bus on station "Prospect Tolbuhina"');
 });
 
 bot.onText(/\/gohome/, (msg) => {

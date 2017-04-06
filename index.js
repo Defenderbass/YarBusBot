@@ -20,6 +20,7 @@ function prepareText(link) {
       xhr = new XMLHttpRequests(),
       original, position, pos;
 
+
    xhr.open('GET', link, false);
    xhr.send();
    original = entities.decode(xhr.responseText).replace(/<[^>]+>/g, ' ').replace(/назад/g, '');

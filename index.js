@@ -17,7 +17,7 @@ const
 
 function createLink(str) {
    let
-      array = str.split();
+      array = str.split(' ');
 
    return 'http://yartr.ru/rasp.php?vt=1&nmar='+ 78 +'&q='+ array[0] + '&id=' + array[1] + '&view=1';
 }

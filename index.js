@@ -7,8 +7,6 @@ const
     token = '370885878:AAHNT9nRTHMd6MJ8dQvRbzw9GFpzomt719s',
     port = process.env.PORT || 8443,
     host = process.env.HOST,
-    busToWork = 'http://yartr.ru/rasp.php?vt=1&nmar=78&q=0&id=47&view=1',
-    busToHome = 'http://yartr.ru/rasp.php?vt=1&nmar=78&q=1&id=424&view=1',
     bot = new TelegramBot(token, {
         polling: true, webhook: {
          'port': port,
@@ -35,16 +33,20 @@ function prepareText(link) {
     return original;
 }
 
+function createLink(bus, way, station) {
+   return 'http://yartr.ru/rasp.php?vt=1&nmar='+ bus +'&q='+ way + '&id=' + station + '&view=1';
+}
+
 bot.onText(/\/start/, (msg) => {
     bot.sendMessage(msg.chat.id, 'Hello! Commands: /gohome - bus on station "Hospital", /gowork bus on station "Prospect Tolbuhina"');
 });
 
 bot.onText(/\/gohome/, (msg) => {
-    bot.sendMessage(msg.chat.id, msg.chat.first_name + ', ' + prepareText(busToHome));
+    bot.sendMessage(msg.chat.id, msg.chat.first_name + ', ' + prepareText(createLink(78, 0, 424)));
 });
 
 bot.onText(/\/gowork/, (msg) => {
-    bot.sendMessage(msg.chat.id, msg.chat.first_name + ', ' + prepareText(busToWork));
+    bot.sendMessage(msg.chat.id, msg.chat.first_name + ', ' + prepareText(createLink(78, 0, 47)));
 });
 
 bot.onText(/\/test (.+) (.+)/, (msg, match) => {

@@ -37,7 +37,7 @@ function prepareText(str) {
     } else {
         original = original.substring(position, original.length);
     }
-    return original;
+    return original + link;
 }
 
 bot.onText(/\/start/, (msg) => {

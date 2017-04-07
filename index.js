@@ -37,7 +37,7 @@ function prepareText(str) {
     } else {
         original = original.substring(position, original.length);
     }
-    return original + link;
+    return original;
 }
 
 bot.onText(/\/start/, (msg) => {
@@ -45,11 +45,11 @@ bot.onText(/\/start/, (msg) => {
 });
 
 bot.onText(/\/gohome/, (msg) => {
-    bot.sendMessage(msg.chat.id, msg.chat.first_name + ', ' + prepareText(createLink('1 424')));
+    bot.sendMessage(msg.chat.id, msg.chat.first_name + ', ' + prepareText('1 424'));
 });
 
 bot.onText(/\/gowork/, (msg) => {
-    bot.sendMessage(msg.chat.id, msg.chat.first_name + ', ' + prepareText(createLink('0 47')));
+    bot.sendMessage(msg.chat.id, msg.chat.first_name + ', ' + prepareText('0 47'));
 });
 
 bot.onText(/\/test (.+) (.+)/, (msg, match) => {

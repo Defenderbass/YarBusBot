@@ -7,14 +7,11 @@ const
 module.exports = {
    /**
     * Create link to the 'yartr.ru' on different bus and station
-    * @param {string} str
+    * @param {Array} arr
     * @returns {string}
     */
-   createLink: function (str) {
-      let
-         array = str.split(' ');
-
-      return 'http://yartr.ru/rasp.php?vt=1&nmar=' + array[0] + '&q=' + array[1] + '&id=' + array[2] + '&view=1';
+   createLink: function (arr) {
+      return `http://yartr.ru/rasp.php?vt=1&nmar=${arr[0]}&q=${arr[1]}&id=${arr[2]}&view=1`;
    },
 
    /**
@@ -33,14 +30,14 @@ module.exports = {
 
    /**
     * Prepares the text for the output
-    * @param {string} str
+    * @param {Array} arr
     * @param {object} msg
     * @param {object} msg.chat
     * @returns {string}
     */
-   prepareText: function (str, msg) {
+   prepareText: function (arr, msg) {
       let
-         link = this.createLink(str),
+         link = this.createLink(arr),
          original, position, pos;
 
       original = entities.decode(this.getResponseText(link)).replace(/<[^>]+>/g, ' ');
@@ -52,7 +49,7 @@ module.exports = {
          original = original.substring(position, original.length);
       }
       original = original.replace(/назад/g, '').replace(/Табло/g, '').replace(/Ав/g, '\n Ав').replace(/Тб/g, '\n Тб');
-      return msg.chat.first_name + ',\n' + original;
+      return `${msg.chat.first_name},\n${original}`;
    },
 
    /**
@@ -91,9 +88,9 @@ module.exports = {
          obj = busMin;
       }
       arr = Object.keys(obj);
-      for (let i = 0; i < arr.length; i++) {
-         data = way + 1 ? obj[arr[i]] : arr[i];
-         result.push([{text: arr[i], callback_data: data}]);
+      for (let value of arr) {
+         data = way + 1 ? obj[value] : value;
+         result.push([{text: value, callback_data: data}]);
       }
 
       return {

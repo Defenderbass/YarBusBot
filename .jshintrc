@@ -24,6 +24,7 @@
     "nonstandard": false,
     "globals": {
         "require": true,
-        "process": true
+        "process": true,
+        "webhook": true
     }
 }

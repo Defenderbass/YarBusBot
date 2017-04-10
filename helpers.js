@@ -110,5 +110,23 @@ module.exports = {
          message_id: msg.message.message_id,
          chat_id: msg.message.chat.id
       }
+   },
+
+   /**
+    * Return name of station
+    * @param {string} bus
+    * @param {string} way
+    * @param {string} station
+    * @returns {string}
+    */
+   getStationNameByValue: function (bus, way, station) {
+      var
+         obj = busMin[bus][way];
+
+      for (let value of Object.keys(obj)) {
+         if (obj[value] === station) {
+            return value;
+         }
+      }
    }
 };

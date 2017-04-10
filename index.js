@@ -125,11 +125,11 @@ bot.onText(/\/bus/, (msg) => {
                bot.sendMessage(chatId, 'Выбери остановку', options).then(function() {
                   bot.once('callback_query', function(msg) {
                      station = msg.data;
+                     bot.sendMessage(chatId, prepareText((way + ' ' + station), msg.message));
                      bot.editMessageText('Остановка выбрана', {
                         message_id: msg.message.message_id,
                         chat_id: chatId
                      });
-                     bot.sendMessage(chatId, prepareText((way + ' ' + station), msg.message));
                   });
                });
             });

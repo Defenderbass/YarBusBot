@@ -24,7 +24,7 @@ bot.onText(/\/gowork/, (msg) => {
    bot.sendMessage(msg.chat.id, helpers.prepareText([78, 0, 47], msg, 1));
 });
 
-bot.onText(/\/go/, (msg) => {
+bot.onText(/\/bus/, (msg) => {
    let
       bus, way, station, chatId, wayString, transport, transportId,
       options = helpers.generateOptions();

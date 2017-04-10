@@ -1,99 +1,30 @@
 const
    TelegramBot = require('node-telegram-bot-api'),
-   busMin = require('./bus.min.json'),
-   busMinNew = require('./bus.min.new.json'),
-   XMLHttpRequests = require('xmlhttprequest').XMLHttpRequest,
-   Entities = require('html-entities').XmlEntities,
-   entities = new Entities(),
-   token = '370885878:AAHNT9nRTHMd6MJ8dQvRbzw9GFpzomt719s',
+   token = '350021916:AAFEyyMdoxJlbayqJxKxCRE-9Go9gTXZ86I'/*'370885878:AAHNT9nRTHMd6MJ8dQvRbzw9GFpzomt719s'*/,
    port = process.env.PORT || 8443,
    host = process.env.HOST,
    bot = new TelegramBot(token, {
-      polling: true, webhook: {
+      polling: true, /*webhook: {
        'port': port,
        'host': host
-       }
-   });
-
-function createLink(str) {
-   let
-      array = str.split(' ');
-
-   return 'http://yartr.ru/rasp.php?vt=1&nmar=' + 78 + '&q=' + array[0] + '&id=' + array[1] + '&view=1';
-}
-
-function getResponseText(link) {
-   let
-      xhr = new XMLHttpRequests();
-   xhr.open('GET', link, false);
-   xhr.send();
-
-   return xhr.responseText;
-}
-
-function prepareText(str, msg) {
-   let
-      link = createLink(str),
-      original, position, pos;
-
-   original = entities.decode(getResponseText(link)).replace(/<[^>]+>/g, ' ');
-   position = original.indexOf('Табло');
-   pos = original.indexOf('назад', position + 2);
-   if (pos + 1) {
-      original = original.substring(position, pos);
-   } else {
-      original = original.substring(position, original.length);
-   }
-   original = original.replace(/назад/g, '').replace(/Табло/g, '').replace(/Ав/g, '\n Ав');
-   return msg.chat.first_name + ',\n' + original;
-}
-
-function getNumberOfWay(bus, way) {
-   let
-      obj = busMinNew[bus],
-      arr = Object.keys(obj);
-
-   return arr.indexOf(way);
-}
-
-function generateOptions(bus, way) {
-   let
-      obj = way + 1 ? busMinNew[bus][way] : busMinNew[bus],
-      arr = Object.keys(obj),
-      result = [],
-      data;
-
-   for (let i = 0; i < arr.length; i++) {
-      data = way + 1 ? obj[arr[i]] : arr[i];
-      result.push([{text: arr[i], callback_data: data}]);
-   }
-
-   return result;
-}
+       }*/
+   }),
+   helpers = require('./helpers.js');
 
 bot.onText(/\/start/, (msg) => {
    bot.sendMessage(msg.chat.id, 'Hello! Commands: /gohome - bus on station "Hospital", /gowork bus on station "Prospect Tolbuhina"');
 });
 
 bot.onText(/\/gohome/, (msg) => {
-   bot.sendMessage(msg.chat.id, prepareText('1 424', msg));
+   bot.sendMessage(msg.chat.id, helpers.prepareText('1 424', msg));
 });
 
 bot.onText(/\/gowork/, (msg) => {
-   bot.sendMessage(msg.chat.id, prepareText('0 47', msg));
-});
-
-bot.onText(/\/test (.+) (.+)/, (msg, match) => {
-   bot.sendMessage(msg.chat.id, prepareText(busMin['78'][match[1]][match[2]], msg));
-});
-
-bot.onText(/\/help/, (msg) => {
-   bot.sendMessage(msg.chat.id,
-      'Направления: центр, брагино \n' +
-      'Остановки: ' + busMin['const'].stations);
+   bot.sendMessage(msg.chat.id, helpers.prepareText('0 47', msg));
 });
 
 bot.onText(/\/bus/, (msg) => {
+   console.log(helpers);
    let
       bus, way, station, chatId,
       options = {
@@ -114,25 +45,25 @@ bot.onText(/\/bus/, (msg) => {
          });
          options = {
             reply_markup: JSON.stringify({
-               inline_keyboard: generateOptions(bus)
+               inline_keyboard: helpers.generateOptions(bus)
             })
          };
          bot.sendMessage(chatId, 'Выбери направление', options).then(function() {
             bot.once('callback_query', function(msg) {
-               way = getNumberOfWay(bus, msg.data);
+               way = helpers.getNumberOfWay(bus, msg.data);
                bot.editMessageText('Направление выбрано', {
                   message_id: msg.message.message_id,
                   chat_id: chatId
                });
                options = {
                   reply_markup: JSON.stringify({
-                     inline_keyboard: generateOptions(bus, msg.data)
+                     inline_keyboard: helpers.generateOptions(bus, msg.data)
                   })
                };
                bot.sendMessage(chatId, 'Выбери остановку', options).then(function() {
                   bot.once('callback_query', function(msg) {
                      station = msg.data;
-                     bot.sendMessage(chatId, prepareText((way + ' ' + station), msg.message));
+                     bot.sendMessage(chatId, helpers.prepareText((way + ' ' + station), msg.message));
                      bot.editMessageText('Остановка выбрана', {
                         message_id: msg.message.message_id,
                         chat_id: chatId

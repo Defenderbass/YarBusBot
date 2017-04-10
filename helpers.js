@@ -88,7 +88,7 @@ module.exports = {
             obj = busMin[bus];
          }
       } else {
-         obj = busMin[bus][way];
+         obj = busMin;
       }
       arr = Object.keys(obj);
       for (let i = 0; i < arr.length; i++) {

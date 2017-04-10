@@ -24,7 +24,6 @@ bot.onText(/\/gowork/, (msg) => {
 });
 
 bot.onText(/\/bus/, (msg) => {
-   console.log(helpers);
    let
       bus, way, station, chatId,
       options = {

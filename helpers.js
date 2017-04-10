@@ -14,7 +14,7 @@ module.exports = {
       let
          array = str.split(' ');
 
-      return 'http://yartr.ru/rasp.php?vt=1&nmar=' + 78 + '&q=' + array[0] + '&id=' + array[1] + '&view=1';
+      return 'http://yartr.ru/rasp.php?vt=1&nmar=' + array[0] + '&q=' + array[1] + '&id=' + array[2] + '&view=1';
    },
 
    /**
@@ -51,7 +51,7 @@ module.exports = {
       } else {
          original = original.substring(position, original.length);
       }
-      original = original.replace(/назад/g, '').replace(/Табло/g, '').replace(/Ав/g, '\n Ав').replace(/Тб/g, '\n Ав');
+      original = original.replace(/назад/g, '').replace(/Табло/g, '').replace(/Ав/g, '\n Ав').replace(/Тб/g, '\n Тб');
       return msg.chat.first_name + ',\n' + original;
    },
 

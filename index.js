@@ -17,11 +17,11 @@ bot.onText(/\/start/, (msg) => {
 });
 
 bot.onText(/\/gohome/, (msg) => {
-   bot.sendMessage(msg.chat.id, helpers.prepareText('1 424', msg));
+   bot.sendMessage(msg.chat.id, helpers.prepareText('78 1 424', msg));
 });
 
 bot.onText(/\/gowork/, (msg) => {
-   bot.sendMessage(msg.chat.id, helpers.prepareText('0 47', msg));
+   bot.sendMessage(msg.chat.id, helpers.prepareText('78 0 47', msg));
 });
 
 bot.onText(/\/bus/, (msg) => {
@@ -43,7 +43,7 @@ bot.onText(/\/bus/, (msg) => {
                bot.sendMessage(chatId, 'Выбери остановку', options).then(() => {
                   bot.once('callback_query', (msg) => {
                      station = msg.data;
-                     bot.sendMessage(chatId, helpers.prepareText((way + ' ' + station), msg.message));
+                     bot.sendMessage(chatId, helpers.prepareText((bus + ' ' + way + ' ' + station), msg.message));
                      bot.editMessageText('Остановка выбрана', helpers.getEditParams(msg));
                   });
                });

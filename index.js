@@ -5,9 +5,9 @@ const
    host = process.env.HOST,
    bot = new TelegramBot(token, {
       polling: true, webhook: {
-         'port': port,
-         'host': host
-      }
+       'port': port,
+       'host': host
+       }
    }),
    helpers = require('./helpers.js'),
    helloText = 'Hello! Just write /bus and enjoy :)';
@@ -26,27 +26,34 @@ bot.onText(/\/gowork/, (msg) => {
 
 bot.onText(/\/bus/, (msg) => {
    let
-      bus, way, station, chatId, wayString,
+      bus, way, station, chatId, wayString, transport,
       options = helpers.generateOptions();
 
-   bot.sendMessage(msg.chat.id, 'Выбери автобус', options).then(() => {
+   bot.sendMessage(msg.chat.id, 'Выбери транспорт', options).then(() => {
       bot.once('callback_query', (msg) => {
-         bus = msg.data;
+         transport = msg.data;
          chatId = msg.message.chat.id;
-         bot.editMessageText(`Выбран ${bus} автобус`, helpers.getEditParams(msg));
-         options = helpers.generateOptions(bus);
-         bot.sendMessage(chatId, 'Выбери направление', options).then(() => {
+         bot.editMessageText(`Выбран ${transport}`, helpers.getEditParams(msg));
+         options = helpers.generateOptions(transport);
+         bot.sendMessage(chatId, 'Выбери номер', options).then(() => {
             bot.once('callback_query', (msg) => {
-               wayString = msg.data;
-               way = helpers.getNumberOfWay(bus, msg.data);
-               bot.editMessageText(`Едем ${msg.data.toLowerCase()}`, helpers.getEditParams(msg));
-               options = helpers.generateOptions(bus, msg.data);
-               bot.sendMessage(chatId, 'Выбери остановку', options).then(() => {
+               bus = msg.data;
+               bot.editMessageText(`Выбран №${bus}`, helpers.getEditParams(msg));
+               options = helpers.generateOptions(transport, bus);
+               bot.sendMessage(chatId, 'Выбери направление', options).then(() => {
                   bot.once('callback_query', (msg) => {
-                     station = msg.data;
-                     bot.sendMessage(chatId, helpers.prepareText([bus, way, station], msg.message));
-                     bot.editMessageText(`Едем с остановки: ${helpers.getStationNameByValue(bus, wayString, station)}`,
-                        helpers.getEditParams(msg));
+                     wayString = msg.data;
+                     way = helpers.getNumberOfWay(transport, bus, msg.data);
+                     bot.editMessageText(`Едем ${msg.data.toLowerCase()}`, helpers.getEditParams(msg));
+                     options = helpers.generateOptions(transport, bus, wayString);
+                     bot.sendMessage(chatId, 'Выбери остановку', options).then(() => {
+                        bot.once('callback_query', (msg) => {
+                           station = msg.data;
+                           bot.sendMessage(chatId, helpers.prepareText([bus, way, station], msg.message));
+                           bot.editMessageText(`Едем с остановки: ${helpers.getStationNameByValue(transport, bus, wayString, station)}`,
+                              helpers.getEditParams(msg));
+                        });
+                     });
                   });
                });
             });

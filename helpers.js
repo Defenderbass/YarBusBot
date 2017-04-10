@@ -120,7 +120,7 @@ module.exports = {
     * @returns {string}
     */
    getStationNameByValue: function (bus, way, station) {
-      var
+      let
          obj = busMin[bus][way];
 
       for (let value of Object.keys(obj)) {

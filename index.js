@@ -26,7 +26,7 @@ bot.onText(/\/gowork/, (msg) => {
 
 bot.onText(/\/bus/, (msg) => {
    let
-      bus, way, station, chatId,
+      bus, way, station, chatId, wayString,
       options = helpers.generateOptions();
 
    bot.sendMessage(msg.chat.id, 'Выбери автобус', options).then(() => {
@@ -37,6 +37,7 @@ bot.onText(/\/bus/, (msg) => {
          options = helpers.generateOptions(bus);
          bot.sendMessage(chatId, 'Выбери направление', options).then(() => {
             bot.once('callback_query', (msg) => {
+               wayString = msg.data;
                way = helpers.getNumberOfWay(bus, msg.data);
                bot.editMessageText(`Едем ${msg.data.toLowerCase()}`, helpers.getEditParams(msg));
                options = helpers.generateOptions(bus, msg.data);
@@ -44,7 +45,7 @@ bot.onText(/\/bus/, (msg) => {
                   bot.once('callback_query', (msg) => {
                      station = msg.data;
                      bot.sendMessage(chatId, helpers.prepareText([bus, way, station], msg.message));
-                     bot.editMessageText(`Едем с остановки: ${helpers.getStationNameByValue(bus, way, station)}`,
+                     bot.editMessageText(`Едем с остановки: ${helpers.getStationNameByValue(bus, wayString, station)}`,
                         helpers.getEditParams(msg));
                   });
                });

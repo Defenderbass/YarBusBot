@@ -6,11 +6,11 @@ const
 
 module.exports = {
    /**
-    * Create link to the Yartr on deferent bus and station
-    * @param str
+    * Create link to the 'yartr.ru' on different bus and station
+    * @param {string} str
     * @returns {string}
     */
-   createLink: function(str) {
+   createLink: function (str) {
       let
          array = str.split(' ');
 
@@ -19,10 +19,10 @@ module.exports = {
 
    /**
     * Return response text of SitePage
-    * @param link
+    * @param {string} link
     * @returns {*|string}
     */
-   getResponseText: function(link) {
+   getResponseText: function (link) {
       let
          xhr = new XMLHttpRequests();
       xhr.open('GET', link, false);
@@ -33,11 +33,12 @@ module.exports = {
 
    /**
     * Prepares the text for the output
-    * @param str
-    * @param msg
+    * @param {string} str
+    * @param {object} msg
+    * @param {object} msg.chat
     * @returns {string}
     */
-   prepareText: function(str, msg) {
+   prepareText: function (str, msg) {
       let
          link = this.createLink(str),
          original, position, pos;
@@ -50,17 +51,17 @@ module.exports = {
       } else {
          original = original.substring(position, original.length);
       }
-      original = original.replace(/назад/g, '').replace(/Табло/g, '').replace(/Ав/g, '\n Ав');
+      original = original.replace(/назад/g, '').replace(/Табло/g, '').replace(/Ав/g, '\n Ав').replace(/Тб/g, '\n Ав');
       return msg.chat.first_name + ',\n' + original;
    },
 
    /**
     * Return number instead name of way
-    * @param bus
-    * @param way
+    * @param {string} bus
+    * @param {string} way
     * @returns {number}
     */
-   getNumberOfWay: function(bus, way) {
+   getNumberOfWay: function (bus, way) {
       let
          obj = busMin[bus],
          arr = Object.keys(obj);
@@ -70,22 +71,47 @@ module.exports = {
 
    /**
     * Return options for Inline Keyboard
-    * @param bus
-    * @param way
-    * @returns {Array}
+    * @param {string=} bus
+    * @param {string=} way
+    * @returns {{reply_markup}}
     */
-   generateOptions: function(bus, way) {
+   generateOptions: function (bus, way) {
       let
-         obj = way + 1 ? busMin[bus][way] : busMin[bus],
-         arr = Object.keys(obj),
+         obj, arr,
          result = [],
          data;
 
+      if (bus) {
+         if (way) {
+            obj = busMin[bus][way];
+         } else {
+            obj = busMin[bus];
+         }
+      } else {
+         obj = busMin[bus][way];
+      }
+      arr = Object.keys(obj);
       for (let i = 0; i < arr.length; i++) {
          data = way + 1 ? obj[arr[i]] : arr[i];
          result.push([{text: arr[i], callback_data: data}]);
       }
 
-      return result;
+      return {
+         reply_markup: JSON.stringify({
+            inline_keyboard: result
+         })
+      };
+   },
+
+   /**
+    * Return params for edit message
+    * @param {object} msg
+    * @returns {{message_id: (*|Number|String), chat_id: string}}
+    */
+   getEditParams: function (msg) {
+      return {
+         message_id: msg.message.message_id,
+         chat_id: msg.message.chat.id
+      }
    }
 };

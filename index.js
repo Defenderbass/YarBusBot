@@ -5,14 +5,15 @@ const
    host = process.env.HOST,
    bot = new TelegramBot(token, {
       polling: true, webhook: {
-       'port': port,
-       'host': host
-       }
+         'port': port,
+         'host': host
+      }
    }),
-   helpers = require('./helpers.js');
+   helpers = require('./helpers.js'),
+   helloText = 'Hello! Just write /bus and enjoy :)';
 
 bot.onText(/\/start/, (msg) => {
-   bot.sendMessage(msg.chat.id, 'Hello! Commands: /gohome - bus on station "Hospital", /gowork bus on station "Prospect Tolbuhina"');
+   bot.sendMessage(msg.chat.id, helloText);
 });
 
 bot.onText(/\/gohome/, (msg) => {
@@ -26,47 +27,24 @@ bot.onText(/\/gowork/, (msg) => {
 bot.onText(/\/bus/, (msg) => {
    let
       bus, way, station, chatId,
-      options = {
-         reply_markup: JSON.stringify({
-            inline_keyboard: [
-               [{text: '78', callback_data: '78'}]
-            ]
-         })
-      };
+      options = helpers.generateOptions();
 
-   bot.sendMessage(msg.chat.id, 'Выбери автобус', options).then(function() {
-      bot.once('callback_query', function(msg) {
+   bot.sendMessage(msg.chat.id, 'Выбери автобус', options).then(() => {
+      bot.once('callback_query', (msg) => {
          bus = msg.data;
          chatId = msg.message.chat.id;
-         bot.editMessageText('Выбран ' + bus + ' автобус', {
-            message_id: msg.message.message_id,
-            chat_id: chatId
-         });
-         options = {
-            reply_markup: JSON.stringify({
-               inline_keyboard: helpers.generateOptions(bus)
-            })
-         };
-         bot.sendMessage(chatId, 'Выбери направление', options).then(function() {
-            bot.once('callback_query', function(msg) {
+         bot.editMessageText('Выбран ' + bus + ' автобус', helpers.getEditParams(msg));
+         options = helpers.generateOptions(bus);
+         bot.sendMessage(chatId, 'Выбери направление', options).then(() => {
+            bot.once('callback_query', (msg) => {
                way = helpers.getNumberOfWay(bus, msg.data);
-               bot.editMessageText('Направление выбрано', {
-                  message_id: msg.message.message_id,
-                  chat_id: chatId
-               });
-               options = {
-                  reply_markup: JSON.stringify({
-                     inline_keyboard: helpers.generateOptions(bus, msg.data)
-                  })
-               };
-               bot.sendMessage(chatId, 'Выбери остановку', options).then(function() {
-                  bot.once('callback_query', function(msg) {
+               bot.editMessageText('Едем ' + msg.data, helpers.getEditParams(msg));
+               options = helpers.generateOptions(bus, msg.data);
+               bot.sendMessage(chatId, 'Выбери остановку', options).then(() => {
+                  bot.once('callback_query', (msg) => {
                      station = msg.data;
                      bot.sendMessage(chatId, helpers.prepareText((way + ' ' + station), msg.message));
-                     bot.editMessageText('Остановка выбрана', {
-                        message_id: msg.message.message_id,
-                        chat_id: chatId
-                     });
+                     bot.editMessageText('Остановка выбрана', helpers.getEditParams(msg));
                   });
                });
             });

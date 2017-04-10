@@ -44,7 +44,7 @@ bot.onText(/\/bus/, (msg) => {
                   bot.once('callback_query', (msg) => {
                      station = msg.data;
                      bot.sendMessage(chatId, helpers.prepareText([bus, way, station], msg.message));
-                     bot.editMessageText(`Едем с остановки: $(helpers.getStationNameByValue(bus, way, station))`,
+                     bot.editMessageText(`Едем с остановки: ${helpers.getStationNameByValue(bus, way, station)}`,
                         helpers.getEditParams(msg));
                   });
                });

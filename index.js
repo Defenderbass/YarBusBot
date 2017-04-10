@@ -17,22 +17,23 @@ bot.onText(/\/start/, (msg) => {
 });
 
 bot.onText(/\/gohome/, (msg) => {
-   bot.sendMessage(msg.chat.id, helpers.prepareText([78, 1, 424], msg));
+   bot.sendMessage(msg.chat.id, helpers.prepareText([78, 1, 424], msg, 1));
 });
 
 bot.onText(/\/gowork/, (msg) => {
-   bot.sendMessage(msg.chat.id, helpers.prepareText([78, 0, 47], msg));
+   bot.sendMessage(msg.chat.id, helpers.prepareText([78, 0, 47], msg, 1));
 });
 
-bot.onText(/\/bus/, (msg) => {
+bot.onText(/\/go/, (msg) => {
    let
-      bus, way, station, chatId, wayString, transport,
+      bus, way, station, chatId, wayString, transport, transportId,
       options = helpers.generateOptions();
 
    bot.sendMessage(msg.chat.id, 'Выбери транспорт', options).then(() => {
       bot.once('callback_query', (msg) => {
          transport = msg.data;
          chatId = msg.message.chat.id;
+         transportId = transport === 'Автобус' ? 1 : 3;
          bot.editMessageText(`Выбран ${transport}`, helpers.getEditParams(msg));
          options = helpers.generateOptions(transport);
          bot.sendMessage(chatId, 'Выбери номер', options).then(() => {
@@ -49,7 +50,7 @@ bot.onText(/\/bus/, (msg) => {
                      bot.sendMessage(chatId, 'Выбери остановку', options).then(() => {
                         bot.once('callback_query', (msg) => {
                            station = msg.data;
-                           bot.sendMessage(chatId, helpers.prepareText([bus, way, station], msg.message));
+                           bot.sendMessage(chatId, helpers.prepareText([bus, way, station], msg.message, transportId));
                            bot.editMessageText(`Едем с остановки: ${helpers.getStationNameByValue(transport, bus, wayString, station)}`,
                               helpers.getEditParams(msg));
                         });

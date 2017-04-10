@@ -10,8 +10,9 @@ module.exports = {
     * @param {Array} arr
     * @returns {string}
     */
-   createLink: function (arr) {
-      return `http://yartr.ru/rasp.php?vt=1&nmar=${arr[0]}&q=${arr[1]}&id=${arr[2]}&view=1`;
+   createLink: function (arr, vt) {
+      return vt === 1 ? `http://yartr.ru/rasp.php?vt=1&nmar=${arr[0]}&q=${arr[1]}&id=${arr[2]}&view=1` :
+         `http://yartr.ru/rasp.php?vt=3&nmar=${arr[0]}&q=${arr[1]}&id=${arr[2]}&name_id=&view=1`;
    },
 
    /**
@@ -35,9 +36,9 @@ module.exports = {
     * @param {object} msg.chat
     * @returns {string}
     */
-   prepareText: function (arr, msg) {
+   prepareText: function (arr, msg, vt) {
       let
-         link = this.createLink(arr),
+         link = this.createLink(arr, vt),
          original, position, pos;
 
       original = entities.decode(this.getResponseText(link)).replace(/<[^>]+>/g, ' ');

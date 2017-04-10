@@ -44,7 +44,7 @@ function prepareText(str, msg) {
    } else {
       original = original.substring(position, original.length);
    }
-   original = original.replace(/назад || Табло/g, '').replace(/Ав/g, '\n Ав');
+   original = original.replace(/назад/g, '').replace(/Табло/g, '').replace(/Ав/g, '\n Ав');
    return msg.chat.first_name + ',\n' + original;
 }
 

@@ -22,14 +22,21 @@ function createLink(str) {
    return 'http://yartr.ru/rasp.php?vt=1&nmar=' + 78 + '&q=' + array[0] + '&id=' + array[1] + '&view=1';
 }
 
-function prepareText(str, msg) {
+function getResponseText(link) {
    let
-      xhr = new XMLHttpRequests(),
-      link = createLink(str),
-      original, position, pos;
+      xhr = new XMLHttpRequests();
    xhr.open('GET', link, false);
    xhr.send();
-   original = entities.decode(xhr.responseText).replace(/<[^>]+>/g, ' ');
+
+   return xhr.responseText;
+}
+
+function prepareText(str, msg) {
+   let
+      link = createLink(str),
+      original, position, pos;
+
+   original = entities.decode(getResponseText(link)).replace(/<[^>]+>/g, ' ');
    position = original.indexOf('Табло');
    pos = original.indexOf('назад', position + 2);
    if (pos + 1) {
@@ -37,8 +44,8 @@ function prepareText(str, msg) {
    } else {
       original = original.substring(position, original.length);
    }
-   original = original.replace(/назад/g, '').replace(/Табло/g, '');
-   return msg.chat.first_name + ', ' + original;
+   original = original.replace(/назад || Табло/g, '');
+   return msg.chat.first_name + ',\n' + original;
 }
 
 bot.onText(/\/start/, (msg) => {

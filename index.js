@@ -48,14 +48,24 @@ function prepareText(str, msg) {
    return msg.chat.first_name + ',\n' + original;
 }
 
+function getNumberOfWay(bus, way) {
+   let
+      obj = busMinNew[bus],
+      arr = Object.keys(obj);
+
+   return arr.indexOf(way);
+}
+
 function generateOptions(bus, way) {
    let
-      obj = busMinNew[bus][way],
+      obj = way + 1 ? busMinNew[bus][way] : busMinNew[bus],
       arr = Object.keys(obj),
-      result = [];
+      result = [],
+      data;
 
    for (let i = 0; i < arr.length; i++) {
-      result.push([{text: arr[i], callback_data: obj[arr[i]]}]);
+      data = way + 1 ? obj[arr[i]] : arr[i];
+      result.push([{text: arr[i], callback_data: data}]);
    }
 
    return result;
@@ -104,22 +114,19 @@ bot.onText(/\/bus/, (msg) => {
          });
          options = {
             reply_markup: JSON.stringify({
-               inline_keyboard: [
-                  [{text: 'В центр', callback_data: '1'}],
-                  [{text: 'В брагино', callback_data: '0'}]
-               ]
+               inline_keyboard: generateOptions(bus)
             })
          };
          bot.sendMessage(chatId, 'Выбери направление', options).then(function() {
             bot.once('callback_query', function(msg) {
-               way = msg.data;
+               way = getNumberOfWay(bus, msg.data);
                bot.editMessageText('Направление выбрано', {
                   message_id: msg.message.message_id,
                   chat_id: chatId
                });
                options = {
                   reply_markup: JSON.stringify({
-                     inline_keyboard: generateOptions(bus, way)
+                     inline_keyboard: generateOptions(bus, msg.data)
                   })
                };
                bot.sendMessage(chatId, 'Выбери остановку', options).then(function() {

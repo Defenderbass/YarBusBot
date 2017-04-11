@@ -55,20 +55,6 @@ module.exports = {
    },
 
    /**
-    * Return number instead name of way
-    * @param {string} bus
-    * @param {string} way
-    * @returns {number}
-    */
-   getNumberOfWay: function (transport, bus, way) {
-      let
-         obj = busMin[transport][bus],
-         arr = Object.keys(obj);
-
-      return arr.indexOf(way);
-   },
-
-   /**
     * Return options for Inline Keyboard
     * @param {string=} bus
     * @param {string=} way
@@ -78,7 +64,7 @@ module.exports = {
       let
          obj, arr,
          result = [],
-         data;
+         data, opt;
       if (transport) {
          if (bus) {
             if (way) {
@@ -96,7 +82,18 @@ module.exports = {
       arr = Object.keys(obj);
       for (let value of arr) {
          data = way ? obj[value] : value;
-         result.push([{text: value, callback_data: data}]);
+         if (transport && bus && !way) {
+            data = JSON.stringify({
+               id: arr.indexOf(value),
+               name: value
+            });
+         }
+         opt = {text: value, callback_data: data};
+         if (arr.indexOf(value) % 2) {
+            result[result.length - 1].push(opt);
+         } else {
+            result.push([opt]);
+         }
       }
 
       return {

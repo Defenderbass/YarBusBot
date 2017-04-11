@@ -8,11 +8,11 @@ module.exports = {
    /**
     * Create link to the 'yartr.ru' on different bus and station
     * @param {Array} arr
+    * @param {Nuber} vt
     * @returns {string}
     */
    createLink: function (arr, vt) {
-      return vt === 1 ? `http://yartr.ru/rasp.php?vt=1&nmar=${arr[0]}&q=${arr[1]}&id=${arr[2]}&view=1` :
-         `http://yartr.ru/rasp.php?vt=3&nmar=${arr[0]}&q=${arr[1]}&id=${arr[2]}&name_id=&view=1`;
+      return `http://yartr.ru/rasp.php?vt=${vt}&nmar=${arr[0]}&q=${arr[1]}&id=${arr[2]}&view=1`;
    },
 
    /**
@@ -51,7 +51,7 @@ module.exports = {
       }
       original = original.replace(/назад/g, '').replace(/Табло/g, '').replace(/Ав/g, '\n Ав').replace(/Тб/g, '\n Тр')
          .replace(/Тм/g, '\n Тм');
-      return `${msg.chat.first_name},\n${original}`;
+      return `${msg.chat.first_name},${original}`;
    },
 
    /**

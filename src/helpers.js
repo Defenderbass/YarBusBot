@@ -186,7 +186,7 @@ module.exports = {
          str = entities.decode(this.getResponseText(`http://yartr.ru/list.php?vt=${vt}`));
       str = str.slice(str.indexOf('<body>'), str.indexOf('</body>'));
       let res = [];
-      str.match(/nmar=\d+/g).map(function (val) {
+      str.match(/nmar=\d+[a-z]?/g).map(function (val) {
          val = '"' + val.replace('nmar=', '') + '"';
          val = val + ':' + val;
          res.push(val);

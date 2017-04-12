@@ -40,7 +40,7 @@ bot.onText(/\/bus/, (msg) => {
                break;
          }
          bot.editMessageText(`Выбран ${transport}`, helpers.getEditParams(msg));
-         options = helpers.generateOptions(transport);
+         options = helpers.generateOptions(transportId);
          bot.sendMessage(chatId, 'Выбери номер', options).then(() => {
             bot.once('callback_query', (msg) => {
                bus = msg.data;

@@ -1,5 +1,4 @@
 const
-   busMin = require('./bus.min.json'),
    Entities = require('html-entities').XmlEntities,
    XMLHttpRequests = require('xmlhttprequest').XMLHttpRequest,
    entities = new Entities();
@@ -73,10 +72,14 @@ module.exports = {
                obj = this.porno(transport, bus);
             }
          } else {
-            obj = busMin[transport];
+            obj = this.pornoList(transport);
          }
       } else {
-         obj = busMin;
+         obj = {
+            'Автобус': {},
+            'Троллейбус': {},
+            'Трамвай': {}
+         };
       }
       arr = Object.keys(obj);
       for (let value of arr) {
@@ -88,10 +91,18 @@ module.exports = {
             });
          }
          opt = {text: value, callback_data: data};
-         if (arr.indexOf(value) % 2) {
-            result[result.length - 1].push(opt);
+         if (arr.length > 30) {
+            if (arr.indexOf(value) % 4) {
+               result[result.length - 1].push(opt);
+            } else {
+               result.push([opt]);
+            }
          } else {
-            result.push([opt]);
+            if (arr.indexOf(value) % 2) {
+               result[result.length - 1].push(opt);
+            } else {
+               result.push([opt]);
+            }
          }
       }
 
@@ -168,5 +179,18 @@ module.exports = {
          return arr.toString().replace(/,/, ':{').replace(/\"\:\"/g, ':').replace(/\"\"/g, '"').replace(/\" \"/g, '"');
       };
       return repBr(str);
+   },
+
+   pornoList: function (vt) {
+      let
+         str = entities.decode(this.getResponseText(`http://yartr.ru/list.php?vt=${vt}`));
+      str = str.slice(str.indexOf('<body>'), str.indexOf('</body>'));
+      let res = [];
+      str.match(/nmar=\d+/g).map(function (val) {
+         val = '"' + val.replace('nmar=', '') + '"';
+         val = val + ':' + val;
+         res.push(val);
+      });
+      return JSON.parse('{' + res.toString() + '}');
    }
 };

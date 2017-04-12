@@ -28,6 +28,17 @@ bot.onText(/\/bus/, (msg) => {
       bot.once('callback_query', (msg) => {
          transport = msg.data;
          chatId = msg.message.chat.id;
+         switch (transport) {
+            case 'Автобус':
+               transportId = 1;
+               break;
+            case 'Троллейбус':
+               transportId = 2;
+               break;
+            default:
+               transportId = 3;
+               break;
+         }
          transportId = transport === 'Автобус' ? 1 : 3;
          bot.editMessageText(`Выбран ${transport}`, helpers.getEditParams(msg));
          options = helpers.generateOptions(transport);

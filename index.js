@@ -1,10 +1,10 @@
 const
    TelegramBot = require('node-telegram-bot-api'),
-   cfg = require('./config'),
+   cfg = require('./src/config'),
    local = false,
    token = '',
    bot = new TelegramBot(cfg.getToken(token), cfg.getBotOptions(local)),
-   helpers = require('./helpers.js'),
+   helpers = require('./src/helpers.js'),
    helloText = 'Hello! Just write /bus and enjoy :)';
 
 bot.onText(/\/start/, (msg) => {

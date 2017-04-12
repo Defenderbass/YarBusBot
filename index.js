@@ -39,7 +39,6 @@ bot.onText(/\/bus/, (msg) => {
                transportId = 3;
                break;
          }
-         transportId = transport === 'Автобус' ? 1 : 3;
          bot.editMessageText(`Выбран ${transport}`, helpers.getEditParams(msg));
          options = helpers.generateOptions(transport);
          bot.sendMessage(chatId, 'Выбери номер', options).then(() => {

@@ -68,9 +68,9 @@ module.exports = {
       if (transport) {
          if (bus) {
             if (way) {
-               obj = busMin[transport][bus][way];
+               obj = this.porno(transport, bus)[way];
             } else {
-               obj = busMin[transport][bus];
+               obj = this.porno(transport, bus);
             }
          } else {
             obj = busMin[transport];
@@ -78,7 +78,6 @@ module.exports = {
       } else {
          obj = busMin;
       }
-
       arr = Object.keys(obj);
       for (let value of arr) {
          data = way ? obj[value] : value;
@@ -124,12 +123,50 @@ module.exports = {
     */
    getStationNameByValue: function (transport, bus, way, station) {
       let
-         obj = busMin[transport][bus][way];
-
-      for (let value of Object.keys(obj)) {
-         if (obj[value] === station) {
-            return value;
+         obj = this.porno(transport, bus)[way];
+      if (obj) {
+         for (let value of Object.keys(obj)) {
+            if (obj[value] === station) {
+               return value;
+            }
          }
       }
+   },
+
+   porno: function (vt, number) {
+      let
+         arr = [], firstArr = [], secondArr = [], repBr, newVal,
+         str = entities.decode(this.getResponseText(`http://yartr.ru/config.php?vt=${vt}&nmar=${number}`));
+      str = str.slice(str.indexOf('<body>'), str.indexOf('</body>'));
+      repBr = (str) => {
+         str = str.replace(/<br\/>/g, '').replace(/<body>/g, '').replace(/<\/body>/g, '').replace(/<\/a>/g, '').replace(/Направление:/g, '')
+            .replace(new RegExp(`<a href='rasp.php\\?vt=${vt}&nmar=${number}&q=0&id=`, 'g'), '').replace(new RegExp(`<a href='rasp.php\\?vt=${vt}&nmar=${number}&q=1&id=`, 'g'), '')
+            .replace(new RegExp(`<a href='list.php\\?vt=${vt}'>назад`, 'g'), '').replace(/&view=1'>/g, ':');
+         str.split('  ').map((val) => {
+            if (val.replace(/"/g, '')) {
+               arr.push('"' + val.trim() + '"');
+            }
+         });
+         arr.pop();
+         let pos = 0;
+         arr.map((val) => {
+            if (val.match(/От /) && arr.indexOf(val)) {
+               pos = arr.indexOf(val);
+            }
+            pos ? secondArr.push(prepareElem(val)) : firstArr.push(prepareElem(val));
+         });
+         return JSON.parse(`\{${ finalReplace(firstArr)}\}\, \n ${finalReplace(secondArr)}\}\}`);
+      };
+      let prepareElem = (val) => {
+         newVal = [];
+         val.split(':').reverse().map((str) => {
+            newVal.push('"' + str + '"');
+         });
+         return newVal.toString().replace(/,/g, ':');
+      };
+      let finalReplace = (arr) => {
+         return arr.toString().replace(/,/, ':{').replace(/\"\:\"/g, ':').replace(/\"\"/g, '"').replace(/\" \"/g, '"');
+      };
+      return repBr(str);
    }
 };

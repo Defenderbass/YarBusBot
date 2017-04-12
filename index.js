@@ -35,19 +35,19 @@ bot.onText(/\/bus/, (msg) => {
             bot.once('callback_query', (msg) => {
                bus = msg.data;
                bot.editMessageText(`Выбран №${bus}`, helpers.getEditParams(msg));
-               options = helpers.generateOptions(transport, bus);
+               options = helpers.generateOptions(transportId, bus);
                bot.sendMessage(chatId, 'Выбери направление', options).then(() => {
                   bot.once('callback_query', (msg) => {
                      data = JSON.parse(msg.data);
                      wayString = data.name;
                      way = data.id;
                      bot.editMessageText(`Едем ${wayString.toLowerCase()}`, helpers.getEditParams(msg));
-                     options = helpers.generateOptions(transport, bus, wayString);
+                     options = helpers.generateOptions(transportId, bus, wayString);
                      bot.sendMessage(chatId, 'Выбери остановку', options).then(() => {
                         bot.once('callback_query', (msg) => {
                            station = msg.data;
                            bot.sendMessage(chatId, helpers.prepareText([bus, way, station], msg.message, transportId));
-                           bot.editMessageText(`Едем с остановки: ${helpers.getStationNameByValue(transport, bus, wayString, station)}`,
+                           bot.editMessageText(`Едем с остановки: ${helpers.getStationNameByValue(transportId, bus, wayString, station)}`,
                               helpers.getEditParams(msg));
                         });
                      });

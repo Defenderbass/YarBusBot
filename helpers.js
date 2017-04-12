@@ -8,7 +8,7 @@ module.exports = {
    /**
     * Create link to the 'yartr.ru' on different bus and station
     * @param {Array} arr
-    * @param {Nuber} vt
+    * @param {Number} vt
     * @returns {string}
     */
    createLink: function (arr, vt) {
@@ -112,7 +112,7 @@ module.exports = {
       return {
          message_id: msg.message.message_id,
          chat_id: msg.message.chat.id
-      }
+      };
    },
 
    /**

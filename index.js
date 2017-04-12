@@ -1,14 +1,9 @@
 const
    TelegramBot = require('node-telegram-bot-api'),
-   token = '370885878:AAHNT9nRTHMd6MJ8dQvRbzw9GFpzomt719s',
-   port = process.env.PORT || 8443,
-   host = process.env.HOST,
-   bot = new TelegramBot(token, {
-      polling: true, webhook: {
-       'port': port,
-       'host': host
-       }
-   }),
+   cfg = require('./config'),
+   local = false,
+   token = '',
+   bot = new TelegramBot(cfg.getToken(token), cfg.getBotOptions(local)),
    helpers = require('./helpers.js'),
    helloText = 'Hello! Just write /bus and enjoy :)';
 

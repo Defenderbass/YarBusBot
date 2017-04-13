@@ -1,9 +1,7 @@
 const
    Entities = require('html-entities').XmlEntities,
-   XMLHttpRequests = require('xmlhttprequest').XMLHttpRequest,
-   entities = new Entities();
-
-const fetch = require('node-fetch');
+   entities = new Entities(),
+   fetch = require('node-fetch');
 
 module.exports = {
    /**
@@ -12,7 +10,7 @@ module.exports = {
     * @param {Number} vt
     * @returns {string}
     */
-   createLink: function (arr, vt) {
+   createLink: function(arr, vt) {
       return `http://yartr.ru/rasp.php?vt=${vt}&nmar=${arr[0]}&q=${arr[1]}&id=${arr[2]}&view=1`;
    },
 
@@ -21,14 +19,7 @@ module.exports = {
     * @param {string} link
     * @returns {*|string}
     */
-   getResponseText: function (link) {
-      // let
-      //    xhr = new XMLHttpRequests();
-      // xhr.open('GET', link, false);
-      // xhr.send();
-
-      // return xhr.responseText;
-
+   getResponseText: function(link) {
       return fetch(link)
          .then(response => response.text());
    },
@@ -40,7 +31,7 @@ module.exports = {
     * @param {object} msg.chat
     * @returns {Promise}
     */
-   prepareText: function (arr, msg, vt) {
+   prepareText: function(arr, msg, vt) {
       let
          link = this.createLink(arr, vt),
          original, position, pos;
@@ -57,8 +48,8 @@ module.exports = {
                } else {
                   original = original.substring(position, original.length);
                }
-               original = original.replace(/назад/g, '').replace(/Табло/g, '').replace(/Ав/g, '\n Ав').replace(/Тб/g, '\n Тр')
-                  .replace(/Тм/g, '\n Тм');
+               original = original.replace(/назад/g, '').replace(/Табло/g, '').replace(/Ав/g, '\n Ав')
+                  .replace(/Тб/g, '\n Тр').replace(/Тм/g, '\n Тм');
                resolve(`${msg.chat.first_name},${original}`);
             })
             .catch(error => reject(error));
@@ -72,15 +63,14 @@ module.exports = {
     * @param {string=} way
     * @returns {Promise}
     */
-   generateOptions: function (transport, bus, way) {
-      let arr, result = [], data, opt, stringBus, objPromise;
+   generateOptions: function(transport, bus, way) {
+      let arr, result = [], data, opt, objPromise;
       if (transport) {
          if (bus) {
             if (way) {
-               objPromise = stringBus ? Promise.resolve(stringBus[way]) : this.porno(transport, bus).then(result => result[way]);
+               objPromise = this.porno(transport, bus).then(result => result[way]);
             } else {
                objPromise = this.porno(transport, bus);
-               // stringBus = obj;
             }
          } else {
             objPromise = this.pornoList(transport);
@@ -91,7 +81,6 @@ module.exports = {
             'Троллейбус': {},
             'Трамвай': {}
          });
-         // stringBus = false;
       }
 
       return new Promise((resolve, reject) => {
@@ -126,8 +115,8 @@ module.exports = {
                   inline_keyboard: result
                })
             });
-         }).catch(error => reject(error))
-      })
+         }).catch(error => reject(error));
+      });
 
    },
 
@@ -136,7 +125,7 @@ module.exports = {
     * @param {object} msg
     * @returns {{message_id: (*|Number|String), chat_id: string}}
     */
-   getEditParams: function (msg) {
+   getEditParams: function(msg) {
       return {
          message_id: msg.message.message_id,
          chat_id: msg.message.chat.id
@@ -150,7 +139,7 @@ module.exports = {
     * @param {string} station
     * @returns {Promise}
     */
-   getStationNameByValue: function (transport, bus, way, station) {
+   getStationNameByValue: function(transport, bus, way, station) {
 
       return new Promise((resolve, reject) => {
          this.porno(transport, bus).then(result => {
@@ -163,26 +152,38 @@ module.exports = {
                }
             }
          }).then(result => resolve(result))
-            .catch(error => reject(error))
-      })
+            .catch(error => reject(error));
+      });
 
    },
 
-   porno: function (vt, number) {
+   porno: function(vt, number) {
       let
          arr = [], firstArr = [], secondArr = [], repBr, newVal,
-         str;
+         finalReplace, prepareElem, str;
 
       return new Promise((resolve, reject) => {
          this.getResponseText(`http://yartr.ru/config.php?vt=${vt}&nmar=${number}`)
             .then(text => {
                str = entities.decode(text);
-
+               prepareElem = (val) => {
+                  newVal = [];
+                  val.split(':').reverse().map((str) => {
+                     newVal.push('"' + str + '"');
+                  });
+                  return newVal.toString().replace(/,/g, ':');
+               };
+               finalReplace = (arr) => {
+                  return arr.toString().replace(/,/, ':{').replace(/\"\:\"/g, ':').replace(/\"\"/g, '"')
+                     .replace(/\" \"/g, '"');
+               };
                str = str.slice(str.indexOf('<body>'), str.indexOf('</body>'));
                repBr = (str) => {
-                  str = str.replace(/<br\/>/g, '').replace(/<body>/g, '').replace(/<\/body>/g, '').replace(/<\/a>/g, '').replace(/Направление:/g, '')
-                     .replace(new RegExp(`<a href='rasp.php\\?vt=${vt}&nmar=${number}&q=0&id=`, 'g'), '').replace(new RegExp(`<a href='rasp.php\\?vt=${vt}&nmar=${number}&q=1&id=`, 'g'), '')
-                     .replace(new RegExp(`<a href='list.php\\?vt=${vt}'>назад`, 'g'), '').replace(/&view=1'>/g, ':');
+                  str = str.replace(/<br\/>/g, '').replace(/<body>/g, '').replace(/<\/body>/g, '').replace(/<\/a>/g, '')
+                     .replace(/Направление:/g, '').replace(new RegExp(`<a href='list.php\\?vt=${vt}'>назад`, 'g'), '')
+                     .replace(new RegExp(`<a href='rasp.php\\?vt=${vt}&nmar=${number}&q=0&id=`, 'g'), '')
+                     .replace(new RegExp(`<a href='rasp.php\\?vt=${vt}&nmar=${number}&q=1&id=`, 'g'), '')
+                     .replace(/&view=1'>/g, ':');
                   str.split('  ').map((val) => {
                      if (val.replace(/"/g, '')) {
                         arr.push('"' + val.trim() + '"');
@@ -198,45 +199,35 @@ module.exports = {
                   });
                   return JSON.parse(`\{${ finalReplace(firstArr)}\}\, \n ${finalReplace(secondArr)}\}\}`);
                };
-               let prepareElem = (val) => {
-                  newVal = [];
-                  val.split(':').reverse().map((str) => {
-                     newVal.push('"' + str + '"');
-                  });
-                  return newVal.toString().replace(/,/g, ':');
-               };
-               let finalReplace = (arr) => {
-                  return arr.toString().replace(/,/, ':{').replace(/\"\:\"/g, ':').replace(/\"\"/g, '"').replace(/\" \"/g, '"');
-               };
                resolve(repBr(str));
             })
-            .catch(error => reject(error))
+            .catch(error => reject(error));
       });
 
 
    },
 
-   pornoList: function (vt) {
+   pornoList: function(vt) {
       return new Promise((resolve, reject) => {
          this.getResponseText(`http://yartr.ru/list.php?vt=${vt}`)
             .then(text => {
                let str = entities.decode(text);
                str = str.slice(str.indexOf('<body>'), str.indexOf('</body>'));
                let res = [];
-               str.match(/nmar=\d+[a-z]?/g).map(function (val) {
+               str.match(/nmar=\d+[a-z]?/g).map(function(val) {
                   val = '"' + val.replace('nmar=', '') + '"';
                   val = val + ':' + val;
                   res.push(val);
                });
                resolve(JSON.parse('{' + res.toString() + '}'));
             })
-            .catch(error => reject(error))
+            .catch(error => reject(error));
       });
    },
 
    getOnceEventPromise(bot, eventName){
       return new Promise((resolve, reject) => {
-         bot.once(eventName, msg => resolve(msg))
-      })
+         bot.once(eventName, msg => resolve(msg));
+      });
    }
 };

@@ -18,7 +18,7 @@ bot.onText(/\/gohome/, (msg) => {
 
 bot.onText(/\/gowork/, (msg) => {
    helpers.prepareText([78, 0, 47], msg, 1)
-      .then(msg => bot.sendMessage(msg.chat.id, msg))
+      .then(msg => bot.sendMessage(msg.chat.id, msg));
 });
 
 bot.onText(/\/bus/, (msg) => {
@@ -42,14 +42,14 @@ bot.onText(/\/bus/, (msg) => {
                break;
          }
          bot.editMessageText(`Выбран ${transport}`, helpers.getEditParams(msg));
-         return helpers.generateOptions(transportId)
+         return helpers.generateOptions(transportId);
       })
       .then(options => bot.sendMessage(chatId, 'Выбери номер', options))
       .then(() => helpers.getOnceEventPromise(bot, 'callback_query'))
       .then((msg) => {
          bus = msg.data;
          bot.editMessageText(`Выбран №${bus}`, helpers.getEditParams(msg));
-         return helpers.generateOptions(transportId, bus)
+         return helpers.generateOptions(transportId, bus);
       })
       .then(options => bot.sendMessage(chatId, 'Выбери направление', options))
       .then(() => helpers.getOnceEventPromise(bot, 'callback_query'))
@@ -58,17 +58,17 @@ bot.onText(/\/bus/, (msg) => {
          wayString = data.name;
          way = data.id;
          bot.editMessageText(`Едем ${wayString.toLowerCase()}`, helpers.getEditParams(msg));
-         return helpers.generateOptions(transportId, bus, wayString)
+         return helpers.generateOptions(transportId, bus, wayString);
       })
       .then(options => bot.sendMessage(chatId, 'Выбери остановку', options))
       .then(() => helpers.getOnceEventPromise(bot, 'callback_query'))
       .then(msg => {
          station = msg.data;
-         return helpers.prepareText([bus, way, station], msg.message, transportId)
+         return helpers.prepareText([bus, way, station], msg.message, transportId);
       })
       .then(text => {
          bot.sendMessage(chatId, text);
-         return helpers.getStationNameByValue(transportId, bus, wayString, station)
+         return helpers.getStationNameByValue(transportId, bus, wayString, station);
       })
       .then(name => bot.editMessageText(`Едем с остановки: ${name}`, helpers.getEditParams(msg)));
 });

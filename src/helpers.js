@@ -63,13 +63,14 @@ module.exports = {
       let
          obj, arr,
          result = [],
-         data, opt;
+         data, opt, stringBus;
       if (transport) {
          if (bus) {
             if (way) {
-               obj = this.porno(transport, bus)[way];
+               obj = stringBus ? stringBus[way] : this.porno(transport, bus)[way];
             } else {
                obj = this.porno(transport, bus);
+               stringBus = obj;
             }
          } else {
             obj = this.pornoList(transport);
@@ -80,6 +81,7 @@ module.exports = {
             'Троллейбус': {},
             'Трамвай': {}
          };
+         stringBus = false;
       }
       arr = Object.keys(obj);
       for (let value of arr) {

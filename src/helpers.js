@@ -175,7 +175,7 @@ module.exports = {
                };
                finalReplace = (arr) => {
                   return arr.toString().replace(/,/, ':{').replace(/\"\:\"/g, ':').replace(/\"\"/g, '"')
-                     .replace(/\" \"/g, '"');
+                     .replace(/\" \"/g, '"').replace(/�/g, '');
                };
                str = str.slice(str.indexOf('<body>'), str.indexOf('</body>'));
                repBr = (str) => {

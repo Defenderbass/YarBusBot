@@ -23,7 +23,7 @@ bot.onText(/\/gowork/, (msg) => {
 
 bot.onText(/\/bus/, (msg) => {
    let
-      bus, way, station, chatId, wayString, transport, transportId, data;
+      bus, way, station, chatId, wayString, transport, transportId, data, id;
    helpers.generateOptions()
       .then(options => bot.sendMessage(msg.chat.id, 'Выбери транспорт', options))
       .then(() => helpers.getOnceEventPromise(bot, 'callback_query'))
@@ -63,6 +63,7 @@ bot.onText(/\/bus/, (msg) => {
       .then(options => bot.sendMessage(chatId, 'Выбери остановку', options))
       .then(() => helpers.getOnceEventPromise(bot, 'callback_query'))
       .then(msg => {
+         id = msg;
          station = msg.data;
          return helpers.prepareText([bus, way, station], msg.message, transportId);
       })
@@ -70,5 +71,5 @@ bot.onText(/\/bus/, (msg) => {
          bot.sendMessage(chatId, text);
          return helpers.getStationNameByValue(transportId, bus, wayString, station);
       })
-      .then(name => bot.editMessageText(`Едем с остановки: ${name}`, helpers.getEditParams(msg)));
+      .then(name => bot.editMessageText(`Едем с остановки: ${name}`, helpers.getEditParams(id)));
 });

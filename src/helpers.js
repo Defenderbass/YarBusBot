@@ -1,28 +1,26 @@
-const
-   Entities = require('html-entities').XmlEntities,
-   entities = new Entities(),
-   fetch = require('node-fetch');
+import {XmlEntities as Entities} from 'html-entities';
+import fetch from 'node-fetch';
+import Memoize from "./Memoize";
 
-module.exports = {
+const entities = new Entities();
+
+class Helper {
    /**
     * Create link to the 'yartr.ru' on different bus and station
     * @param {Array} arr
     * @param {Number} vt
     * @returns {string}
     */
-   createLink: function(arr, vt) {
+   createLink(arr, vt) {
       return `http://yartr.ru/rasp.php?vt=${vt}&nmar=${arr[0]}&q=${arr[1]}&id=${arr[2]}&view=1`;
-   },
+   }
 
    /**
     * Return response text of SitePage
     * @param {string} link
     * @returns {*|string}
     */
-   getResponseText: function(link) {
-      return fetch(link)
-         .then(response => response.text());
-   },
+   getResponseText = (link) => fetch(link).then(response => response.text());
 
    /**
     * Prepares the text for the output
@@ -31,7 +29,7 @@ module.exports = {
     * @param {object} msg.chat
     * @returns {Promise}
     */
-   prepareText: function(arr, msg, vt) {
+   prepareText(arr, msg, vt) {
       let
          link = this.createLink(arr, vt),
          original, position, pos;
@@ -55,7 +53,7 @@ module.exports = {
             .catch(error => reject(error));
       });
 
-   },
+   }
 
    /**
     * Return options for Inline Keyboard
@@ -63,7 +61,8 @@ module.exports = {
     * @param {string=} way
     * @returns {Promise}
     */
-   generateOptions: function(transport, bus, way) {
+   @Memoize
+   generateOptions(transport, bus, way) {
       let arr, result = [], data, opt, objPromise;
       if (transport) {
          if (bus) {
@@ -118,19 +117,17 @@ module.exports = {
          }).catch(error => reject(error));
       });
 
-   },
+   }
 
    /**
     * Return params for edit message
     * @param {object} msg
     * @returns {{message_id: (*|Number|String), chat_id: string}}
     */
-   getEditParams: function(msg) {
-      return {
-         message_id: msg.message.message_id,
-         chat_id: msg.message.chat.id
-      };
-   },
+   getEditParams = (msg) => ({
+      message_id: msg.message.message_id,
+      chat_id: msg.message.chat.id
+   });
 
    /**
     * Return name of station
@@ -139,7 +136,7 @@ module.exports = {
     * @param {string} station
     * @returns {Promise}
     */
-   getStationNameByValue: function(transport, bus, way, station) {
+   getStationNameByValue(transport, bus, way, station) {
 
       return new Promise((resolve, reject) => {
          this.porno(transport, bus).then(result => {
@@ -155,9 +152,9 @@ module.exports = {
             .catch(error => reject(error));
       });
 
-   },
+   }
 
-   porno: function(vt, number) {
+   porno(vt, number) {
       let
          arr = [], firstArr = [], secondArr = [], repBr, newVal,
          finalReplace, prepareElem, str;
@@ -205,10 +202,10 @@ module.exports = {
       });
 
 
-   },
+   }
 
-   pornoList: function(vt) {
-      return new Promise((resolve, reject) => {
+   pornoList = (vt) =>
+      new Promise((resolve, reject) => {
          this.getResponseText(`http://yartr.ru/list.php?vt=${vt}`)
             .then(text => {
                let str = entities.decode(text);
@@ -223,11 +220,11 @@ module.exports = {
             })
             .catch(error => reject(error));
       });
-   },
 
-   getOnceEventPromise(bot, eventName){
-      return new Promise((resolve, reject) => {
+   getOnceEventPromise = (bot, eventName) =>
+      new Promise((resolve, reject) => {
          bot.once(eventName, msg => resolve(msg));
       });
-   }
-};
+}
+
+export default new Helper();

@@ -7,13 +7,17 @@
   },
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "tsc && node ./build/index.js",
+    "server": "nodemon --exec node ./build/index.js",
+    "build": "tsc -w"
   },
   "dependencies": {
     "ejs": "2.4.1",
     "html-entities": "1.2.0",
     "node-fetch": "^1.6.3",
-    "node-telegram-bot-api": "0.27.0"
+    "node-telegram-bot-api": "0.27.0",
+    "nodemon": "^1.11.0",
+    "typescript": "^2.2.2"
   },
   "repository": {
     "type": "git",

@@ -1,4 +1,4 @@
-module.exports = {
+export default {
    getToken: function(token) {
       return token ? token : '370885878:AAHNT9nRTHMd6MJ8dQvRbzw9GFpzomt719s';
    },

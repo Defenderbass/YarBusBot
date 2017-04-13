@@ -1,10 +1,11 @@
+import * as TelegramBot from 'node-telegram-bot-api';
+import cfg from './config';
+import helpers from './helpers.js';
+
 const
-   TelegramBot = require('node-telegram-bot-api'),
-   cfg = require('./src/config'),
    local = false,
-   token = '',
+   token = '212828829:AAHmzigD5-WsGSF_pDuPq_ZEvcGTVhIftMc',
    bot = new TelegramBot(cfg.getToken(token), cfg.getBotOptions(local)),
-   helpers = require('./src/helpers.js'),
    helloText = 'Hello! Just write /bus and enjoy :)';
 
 bot.onText(/\/start/, (msg) => {

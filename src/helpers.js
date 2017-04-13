@@ -3,6 +3,8 @@ const
    XMLHttpRequests = require('xmlhttprequest').XMLHttpRequest,
    entities = new Entities();
 
+const fetch = require('node-fetch');
+
 module.exports = {
    /**
     * Create link to the 'yartr.ru' on different bus and station
@@ -20,12 +22,15 @@ module.exports = {
     * @returns {*|string}
     */
    getResponseText: function (link) {
-      let
-         xhr = new XMLHttpRequests();
-      xhr.open('GET', link, false);
-      xhr.send();
+      // let
+      //    xhr = new XMLHttpRequests();
+      // xhr.open('GET', link, false);
+      // xhr.send();
 
-      return xhr.responseText;
+      // return xhr.responseText;
+
+      return fetch(link)
+         .then(response => response.text());
    },
 
    /**
@@ -33,86 +38,97 @@ module.exports = {
     * @param {Array} arr
     * @param {object} msg
     * @param {object} msg.chat
-    * @returns {string}
+    * @returns {Promise}
     */
    prepareText: function (arr, msg, vt) {
       let
          link = this.createLink(arr, vt),
          original, position, pos;
 
-      original = entities.decode(this.getResponseText(link)).replace(/<[^>]+>/g, ' ');
-      position = original.indexOf('Табло');
-      pos = original.indexOf('назад', position + 2);
-      if (pos + 1) {
-         original = original.substring(position, pos);
-      } else {
-         original = original.substring(position, original.length);
-      }
-      original = original.replace(/назад/g, '').replace(/Табло/g, '').replace(/Ав/g, '\n Ав').replace(/Тб/g, '\n Тр')
-         .replace(/Тм/g, '\n Тм');
-      return `${msg.chat.first_name},${original}`;
+
+      return new Promise((resolve, reject) => {
+         this.getResponseText(link)
+            .then(text => {
+               original = entities.decode(text).replace(/<[^>]+>/g, ' ');
+               position = original.indexOf('Табло');
+               pos = original.indexOf('назад', position + 2);
+               if (pos + 1) {
+                  original = original.substring(position, pos);
+               } else {
+                  original = original.substring(position, original.length);
+               }
+               original = original.replace(/назад/g, '').replace(/Табло/g, '').replace(/Ав/g, '\n Ав').replace(/Тб/g, '\n Тр')
+                  .replace(/Тм/g, '\n Тм');
+               resolve(`${msg.chat.first_name},${original}`);
+            })
+            .catch(error => reject(error));
+      });
+
    },
 
    /**
     * Return options for Inline Keyboard
     * @param {string=} bus
     * @param {string=} way
-    * @returns {{reply_markup}}
+    * @returns {Promise}
     */
    generateOptions: function (transport, bus, way) {
-      let
-         obj, arr,
-         result = [],
-         data, opt, stringBus;
+      let arr, result = [], data, opt, stringBus, objPromise;
       if (transport) {
          if (bus) {
             if (way) {
-               obj = stringBus ? stringBus[way] : this.porno(transport, bus)[way];
+               objPromise = stringBus ? Promise.resolve(stringBus[way]) : this.porno(transport, bus).then(result => result[way]);
             } else {
-               obj = this.porno(transport, bus);
-               stringBus = obj;
+               objPromise = this.porno(transport, bus);
+               // stringBus = obj;
             }
          } else {
-            obj = this.pornoList(transport);
+            objPromise = this.pornoList(transport);
          }
       } else {
-         obj = {
+         objPromise = Promise.resolve({
             'Автобус': {},
             'Троллейбус': {},
             'Трамвай': {}
-         };
-         stringBus = false;
-      }
-      arr = Object.keys(obj);
-      for (let value of arr) {
-         data = way ? obj[value] : value;
-         if (transport && bus && !way) {
-            data = JSON.stringify({
-               id: arr.indexOf(value),
-               name: value
-            });
-         }
-         opt = {text: value, callback_data: data};
-         if (arr.length > 30) {
-            if (arr.indexOf(value) % 4) {
-               result[result.length - 1].push(opt);
-            } else {
-               result.push([opt]);
-            }
-         } else {
-            if (arr.indexOf(value) % 2) {
-               result[result.length - 1].push(opt);
-            } else {
-               result.push([opt]);
-            }
-         }
+         });
+         // stringBus = false;
       }
 
-      return {
-         reply_markup: JSON.stringify({
-            inline_keyboard: result
-         })
-      };
+      return new Promise((resolve, reject) => {
+         objPromise.then(obj => {
+            arr = Object.keys(obj);
+            for (let value of arr) {
+               data = way ? obj[value] : value;
+               if (transport && bus && !way) {
+                  data = JSON.stringify({
+                     id: arr.indexOf(value),
+                     name: value
+                  });
+               }
+               opt = {text: value, callback_data: data};
+               if (arr.length > 30) {
+                  if (arr.indexOf(value) % 4) {
+                     result[result.length - 1].push(opt);
+                  } else {
+                     result.push([opt]);
+                  }
+               } else {
+                  if (arr.indexOf(value) % 2) {
+                     result[result.length - 1].push(opt);
+                  } else {
+                     result.push([opt]);
+                  }
+               }
+            }
+
+            resolve({
+               reply_markup: JSON.stringify({
+                  inline_keyboard: result
+               })
+            });
+         }).catch(error => reject(error))
+      })
+
    },
 
    /**
@@ -132,67 +148,95 @@ module.exports = {
     * @param {string} bus
     * @param {string} way
     * @param {string} station
-    * @returns {string}
+    * @returns {Promise}
     */
    getStationNameByValue: function (transport, bus, way, station) {
-      let
-         obj = this.porno(transport, bus)[way];
-      if (obj) {
-         for (let value of Object.keys(obj)) {
-            if (obj[value] === station) {
-               return value;
+
+      return new Promise((resolve, reject) => {
+         this.porno(transport, bus).then(result => {
+            let obj = result[way];
+            if (obj) {
+               for (let value of Object.keys(obj)) {
+                  if (obj[value] === station) {
+                     return value;
+                  }
+               }
             }
-         }
-      }
+         }).then(result => resolve(result))
+            .catch(error => reject(error))
+      })
+
    },
 
    porno: function (vt, number) {
       let
          arr = [], firstArr = [], secondArr = [], repBr, newVal,
-         str = entities.decode(this.getResponseText(`http://yartr.ru/config.php?vt=${vt}&nmar=${number}`));
-      str = str.slice(str.indexOf('<body>'), str.indexOf('</body>'));
-      repBr = (str) => {
-         str = str.replace(/<br\/>/g, '').replace(/<body>/g, '').replace(/<\/body>/g, '').replace(/<\/a>/g, '').replace(/Направление:/g, '')
-            .replace(new RegExp(`<a href='rasp.php\\?vt=${vt}&nmar=${number}&q=0&id=`, 'g'), '').replace(new RegExp(`<a href='rasp.php\\?vt=${vt}&nmar=${number}&q=1&id=`, 'g'), '')
-            .replace(new RegExp(`<a href='list.php\\?vt=${vt}'>назад`, 'g'), '').replace(/&view=1'>/g, ':');
-         str.split('  ').map((val) => {
-            if (val.replace(/"/g, '')) {
-               arr.push('"' + val.trim() + '"');
-            }
-         });
-         arr.pop();
-         let pos = 0;
-         arr.map((val) => {
-            if (val.match(/От /) && arr.indexOf(val)) {
-               pos = arr.indexOf(val);
-            }
-            pos ? secondArr.push(prepareElem(val)) : firstArr.push(prepareElem(val));
-         });
-         return JSON.parse(`\{${ finalReplace(firstArr)}\}\, \n ${finalReplace(secondArr)}\}\}`);
-      };
-      let prepareElem = (val) => {
-         newVal = [];
-         val.split(':').reverse().map((str) => {
-            newVal.push('"' + str + '"');
-         });
-         return newVal.toString().replace(/,/g, ':');
-      };
-      let finalReplace = (arr) => {
-         return arr.toString().replace(/,/, ':{').replace(/\"\:\"/g, ':').replace(/\"\"/g, '"').replace(/\" \"/g, '"');
-      };
-      return repBr(str);
+         str;
+
+      return new Promise((resolve, reject) => {
+         this.getResponseText(`http://yartr.ru/config.php?vt=${vt}&nmar=${number}`)
+            .then(text => {
+               str = entities.decode(text);
+
+               str = str.slice(str.indexOf('<body>'), str.indexOf('</body>'));
+               repBr = (str) => {
+                  str = str.replace(/<br\/>/g, '').replace(/<body>/g, '').replace(/<\/body>/g, '').replace(/<\/a>/g, '').replace(/Направление:/g, '')
+                     .replace(new RegExp(`<a href='rasp.php\\?vt=${vt}&nmar=${number}&q=0&id=`, 'g'), '').replace(new RegExp(`<a href='rasp.php\\?vt=${vt}&nmar=${number}&q=1&id=`, 'g'), '')
+                     .replace(new RegExp(`<a href='list.php\\?vt=${vt}'>назад`, 'g'), '').replace(/&view=1'>/g, ':');
+                  str.split('  ').map((val) => {
+                     if (val.replace(/"/g, '')) {
+                        arr.push('"' + val.trim() + '"');
+                     }
+                  });
+                  arr.pop();
+                  let pos = 0;
+                  arr.map((val) => {
+                     if (val.match(/От /) && arr.indexOf(val)) {
+                        pos = arr.indexOf(val);
+                     }
+                     pos ? secondArr.push(prepareElem(val)) : firstArr.push(prepareElem(val));
+                  });
+                  return JSON.parse(`\{${ finalReplace(firstArr)}\}\, \n ${finalReplace(secondArr)}\}\}`);
+               };
+               let prepareElem = (val) => {
+                  newVal = [];
+                  val.split(':').reverse().map((str) => {
+                     newVal.push('"' + str + '"');
+                  });
+                  return newVal.toString().replace(/,/g, ':');
+               };
+               let finalReplace = (arr) => {
+                  return arr.toString().replace(/,/, ':{').replace(/\"\:\"/g, ':').replace(/\"\"/g, '"').replace(/\" \"/g, '"');
+               };
+               resolve(repBr(str));
+            })
+            .catch(error => reject(error))
+      });
+
+
    },
 
    pornoList: function (vt) {
-      let
-         str = entities.decode(this.getResponseText(`http://yartr.ru/list.php?vt=${vt}`));
-      str = str.slice(str.indexOf('<body>'), str.indexOf('</body>'));
-      let res = [];
-      str.match(/nmar=\d+[a-z]?/g).map(function (val) {
-         val = '"' + val.replace('nmar=', '') + '"';
-         val = val + ':' + val;
-         res.push(val);
+      return new Promise((resolve, reject) => {
+         this.getResponseText(`http://yartr.ru/list.php?vt=${vt}`)
+            .then(text => {
+               let str = entities.decode(text);
+               str = str.slice(str.indexOf('<body>'), str.indexOf('</body>'));
+               let res = [];
+               str.match(/nmar=\d+[a-z]?/g).map(function (val) {
+                  val = '"' + val.replace('nmar=', '') + '"';
+                  val = val + ':' + val;
+                  res.push(val);
+               });
+               resolve(JSON.parse('{' + res.toString() + '}'));
+            })
+            .catch(error => reject(error))
       });
-      return JSON.parse('{' + res.toString() + '}');
+   },
+
+   getOnceEventPromise(bot, eventName){
+      return new Promise((resolve, reject) => {
+         bot.once(eventName, msg => resolve(msg))
+      })
    }
 };

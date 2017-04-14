@@ -4,7 +4,7 @@ import helpers from './helpers.js';
 
 const
    local = false,
-   token = '212828829:AAHmzigD5-WsGSF_pDuPq_ZEvcGTVhIftMc',
+   token = '',
    bot = new TelegramBot(cfg.getToken(token), cfg.getBotOptions(local)),
    helloText = 'Hello! Just write /bus and enjoy :)';
 

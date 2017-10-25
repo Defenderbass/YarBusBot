@@ -169,6 +169,10 @@ module.exports = {
                prepareElem = (val) => {
                   newVal = [];
                   val.split(':').reverse().map((str) => {
+                     if (str.length > 25) {
+                         str = str.toString().substr(0, 25) + '"';
+                     }
+
                      newVal.push('"' + str + '"');
                   });
                   return newVal.toString().replace(/,/g, ':');

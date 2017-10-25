@@ -13,12 +13,14 @@ bot.onText(/\/start/, (msg) => {
 
 bot.onText(/\/gohome/, (msg) => {
    helpers.prepareText([78, 1, 424], msg, 1)
-      .then(msg => bot.sendMessage(msg.chat.id, msg));
+      .then(text =>
+          bot.sendMessage(msg.chat.id, text)
+      );
 });
 
 bot.onText(/\/gowork/, (msg) => {
    helpers.prepareText([78, 0, 47], msg, 1)
-      .then(msg => bot.sendMessage(msg.chat.id, msg));
+      .then(text => bot.sendMessage(msg.chat.id, text));
 });
 
 bot.onText(/\/bus/, (msg) => {

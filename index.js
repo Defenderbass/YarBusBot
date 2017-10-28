@@ -14,7 +14,7 @@ bot.onText(/\/start/, (msg) => {
 bot.onText(/\/gohome/, (msg) => {
    helpers.prepareText([78, 1, 424], msg, 1)
       .then(text =>
-          bot.sendMessage(msg.chat.id, text)
+         bot.sendMessage(msg.chat.id, text)
       );
 });
 
@@ -73,5 +73,35 @@ bot.onText(/\/bus/, (msg) => {
          bot.sendMessage(chatId, text);
          return helpers.getStationNameByValue(transportId, bus, wayString, station);
       })
-      .then(name => bot.editMessageText(`Едем с остановки: ${name}`, helpers.getEditParams(id)));
+      .then(name => {
+         bot.editMessageText(`Едем с остановки: ${name}`, helpers.getEditParams(id));
+         bot.sendMessage(chatId, 'Дай мне свою локацию и я покажу где ближайший', {
+            reply_markup: {
+               one_time_keyboard: true,
+               keyboard: [
+                  [
+                     {
+                        text: 'Поделиться локацией (тестовый режим)',
+                        request_location: true
+                     }],
+                  [{
+                     text: 'Не хочу'
+                  }]
+               ]
+            }
+         }).then(msg => {
+            bot.on('message', (position) => {
+               if (position.location) {
+                  bot.off('message');
+                  helpers.getStation([position.location.latitude, position.location.longitude], transportId, bus, way)
+                     .then((res) => {
+                        bot.sendLocation(chatId, res.location[0], res.location[1]);
+                        bot.sendMessage(chatId, res.text);
+                     });
+               } else {
+                  bot.sendMessage(chatId, 'Это не локация =(')
+               }
+            });
+         });
+      });
 });

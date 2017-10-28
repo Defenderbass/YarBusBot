@@ -10,7 +10,7 @@ module.exports = {
     * @param {Number} vt
     * @returns {string}
     */
-   createLink: function(arr, vt) {
+   createLink: function (arr, vt) {
       return `http://yartr.ru/rasp.php?vt=${vt}&nmar=${arr[0]}&q=${arr[1]}&id=${arr[2]}&view=1`;
    },
 
@@ -19,7 +19,7 @@ module.exports = {
     * @param {string} link
     * @returns {*|string}
     */
-   getResponseText: function(link) {
+   getResponseText: function (link) {
       return fetch(link)
          .then(response => response.text());
    },
@@ -31,7 +31,7 @@ module.exports = {
     * @param {object} msg.chat
     * @returns {Promise}
     */
-   prepareText: function(arr, msg, vt) {
+   prepareText: function (arr, msg, vt) {
       let
          link = this.createLink(arr, vt),
          original, position, pos;
@@ -48,8 +48,7 @@ module.exports = {
                } else {
                   original = original.substring(position, original.length);
                }
-               original = original.replace(/назад/g, '').replace(/Табло/g, '').replace(/Ав/g, '\n Ав')
-                  .replace(/Тб/g, '\n Тр').replace(/Тм/g, '\n Тм');
+               original = original.replace(/назад|Табло/g, '').replace(/Ав|Тм|Тб/g, '\n $&');
                resolve(`${msg.chat.first_name},${original}`);
             })
             .catch(error => reject(error));
@@ -63,7 +62,7 @@ module.exports = {
     * @param {string=} way
     * @returns {Promise}
     */
-   generateOptions: function(transport, bus, way) {
+   generateOptions: function (transport, bus, way) {
       let arr, result = [], data, opt, objPromise;
       if (transport) {
          if (bus) {
@@ -125,7 +124,7 @@ module.exports = {
     * @param {object} msg
     * @returns {{message_id: (*|Number|String), chat_id: string}}
     */
-   getEditParams: function(msg) {
+   getEditParams: function (msg) {
       return {
          message_id: msg.message.message_id,
          chat_id: msg.message.chat.id
@@ -139,7 +138,7 @@ module.exports = {
     * @param {string} station
     * @returns {Promise}
     */
-   getStationNameByValue: function(transport, bus, way, station) {
+   getStationNameByValue: function (transport, bus, way, station) {
 
       return new Promise((resolve, reject) => {
          this.porno(transport, bus).then(result => {
@@ -157,8 +156,9 @@ module.exports = {
 
    },
 
-   porno: function(vt, number) {
+   porno: function (vt, number) {
       let
+         removeRegExp = /<br\/>|<body>|<\/body>|<\/a>|Направление:/g,
          arr = [], firstArr = [], secondArr = [], repBr, newVal,
          finalReplace, prepareElem, str;
 
@@ -170,7 +170,7 @@ module.exports = {
                   newVal = [];
                   val.split(':').reverse().map((str) => {
                      if (str.length > 25) {
-                         str = str.toString().substr(0, 25) + '"';
+                        str = str.toString().substr(0, 25) + '"';
                      }
 
                      newVal.push('"' + str + '"');
@@ -178,13 +178,12 @@ module.exports = {
                   return newVal.toString().replace(/,/g, ':');
                };
                finalReplace = (arr) => {
-                  return arr.toString().replace(/,/, ':{').replace(/\"\:\"/g, ':').replace(/\"\"/g, '"')
-                     .replace(/\" \"/g, '"').replace(/�/g, '');
+                  return arr.toString().replace(/,/, ':{').replace(/\"\:\"/g, ':').replace(/\"\"|\" \"/g, '"').replace(/�/g, '');
                };
                str = str.slice(str.indexOf('<body>'), str.indexOf('</body>'));
                repBr = (str) => {
-                  str = str.replace(/<br\/>/g, '').replace(/<body>/g, '').replace(/<\/body>/g, '').replace(/<\/a>/g, '')
-                     .replace(/Направление:/g, '').replace(new RegExp(`<a href='list.php\\?vt=${vt}'>назад`, 'g'), '')
+                  str = str.replace(removeRegExp, '')
+                     .replace(new RegExp(`<a href='list.php\\?vt=${vt}'>назад`, 'g'), '')
                      .replace(new RegExp(`<a href='rasp.php\\?vt=${vt}&nmar=${number}&q=0&id=`, 'g'), '')
                      .replace(new RegExp(`<a href='rasp.php\\?vt=${vt}&nmar=${number}&q=1&id=`, 'g'), '')
                      .replace(/&view=1'>/g, ':');
@@ -211,14 +210,49 @@ module.exports = {
 
    },
 
-   pornoList: function(vt) {
+   getStation: function (myPosition = [57.63189, 39.83377], transport = 1, bus = 78, way, prev = []) {
+      return new Promise((resolve, reject) => {
+         this.getResponseText(`http://www.ot76.ru/getpe.php?vt=${transport}&r=[%22${bus}%22]`)
+            .then(text => {
+                  let
+                     temp = 0,
+                     stationArray = JSON.parse(text),
+                     tr = [];
+
+                  /*
+                  * Надо убрать лишние автобусы которые едут в обратном направлении
+                  * Убрать по way
+                  * */
+
+                  stationArray.forEach(function (arr) {
+                     if (!(arr[1] === prev[0] && arr[2] === prev[1])) {
+                        tr.push(Math.sqrt(Math.pow((arr[1] - myPosition[0]), 2) + Math.pow((arr[2] - myPosition[1]), 2)));
+                     }
+                  });
+
+                  tr.forEach(function (coord) {
+                     if (!temp || (coord < temp)) {
+                        temp = coord
+                     }
+                  });
+                  resolve({
+                     text: 'Ближайший к вам : ' + bus,
+                     location: [stationArray[tr.indexOf(temp)][2], stationArray[tr.indexOf(temp)][1]]
+                  });
+               }
+            );
+      });
+
+   },
+
+   pornoList: function (vt) {
       return new Promise((resolve, reject) => {
          this.getResponseText(`http://yartr.ru/list.php?vt=${vt}`)
             .then(text => {
                let str = entities.decode(text);
                str = str.slice(str.indexOf('<body>'), str.indexOf('</body>'));
                let res = [];
-               str.match(/nmar=\d+[a-z]?/g).map(function(val) {
+               str.match(/nmar=\d+[a-z]?/g).map(function (val) {
                   val = '"' + val.replace('nmar=', '') + '"';
                   val = val + ':' + val;
                   res.push(val);
@@ -229,7 +263,7 @@ module.exports = {
       });
    },
 
-   getOnceEventPromise(bot, eventName){
+   getOnceEventPromise(bot, eventName) {
       return new Promise((resolve, reject) => {
          bot.once(eventName, msg => resolve(msg));
       });
